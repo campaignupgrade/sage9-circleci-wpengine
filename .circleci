@@ -1,0 +1,110 @@
+# Sage 9 — CircleCI — WPEngine
+# https://discourse.roots.io/t/sage-9-on-wpengine/9090/46
+#
+# PHP CircleCI 2.0 configuration file
+# Check https://circleci.com/docs/2.0/language-php/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # app server
+      - image: circleci/php:apache-node-browsers
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: apt - Install mysql client (for wp-cli) & libpng (for yarn)
+          command: sudo apt install -y mysql-client libpng16-16 libpng-dev
+
+      - run:
+          name: hacky fix for yarn mozjpeg cjpeg libpng12.so.0 error
+          command: echo "deb http://mirrors.kernel.org/ubuntu/ xenial main" | sudo tee -a /etc/apt/sources.list && sudo apt-get update && sudo apt install -y --allow-unauthenticated libpng12-0
+
+      - run:
+          name: npm - Install eslint & webpack globally so the binaries exist
+          command: sudo npm install -g --save-dev eslint webpack webpack-cli
+
+      - run:
+          name: npm - Installing webpack plugins & other yarn dependencies locally
+          command: npm install --save-dev clean-webpack-plugin copy-globs-webpack-plugin eslint extract-text-webpack-plugin imagemin-mozjpeg imagemin-webpack-plugin friendly-errors-webpack-plugin locate-path stylelint stylelint-config-standard stylelint-webpack-plugin webpack webpack-assets-manifest webpack-dev-server webpack-cli webpack-merge yargs
+
+      - run:
+          name: composer - Install dependencies
+          command: |
+            cd ~/repo/wp-content/themes/truthout4
+            composer install --no-progress
+
+      - run:
+          name: yarn - Install dependencies
+          command: |
+            cd ~/repo/wp-content/themes/truthout4
+            yarn
+
+      # probably don't need this
+      - run:
+          name: composer - Dump autoload
+          command: |
+            cd ~/repo/wp-content/themes/truthout4
+            composer dump-autoload
+
+      - run:
+          name: yarn - Build
+          command: |
+            cd ~/repo/wp-content/themes/truthout4
+            yarn run build:production
+
+      - run:
+          name: wpengine - ssh setup
+          command: |
+            mkdir ~/deploy
+            #sudo apt-get install openssh-client -y
+            #echo "$WPENGINE_DEPLOY_KEY" > ~/.ssh/deploy
+            #chmod 600 ~/.ssh/deploy ~/.ssh/deploy
+            echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+            #echo -e "Host git.wpengine.com\n\tIdentityFile ~/.ssh/deploy\n\n" >> ~/.ssh/config
+
+
+      - run:
+          name: wpengine - clone from git
+          # maps your branch names to WPE install git repos
+          # configure with ':staging' for legacy staging environment
+          # configure with your own name and email
+          command: |
+            git config --global user.email "YOUR@EMAIL.HERE"
+            git config --global user.name "YOUR NAME HERE"
+            case "$CIRCLE_BRANCH" in
+            dev)
+              git clone git@git.wpengine.com:production/DEVSITE.git ~/deploy
+              ;;
+            staging)
+              git clone git@git.wpengine.com:staging/MAINSITE.git ~/deploy
+              ;;
+            production)
+              git clone git@git.wpengine.com:production/MAINSITE.git ~/deploy
+              ;;
+            *)
+              echo "Unsupported branch"
+            #  exit 1
+              ;;
+            esac
+
+
+      - run:
+          name: wpengine - rsync wp-content from ~/repo to ~/deploy
+          command: rsync -a --delete --exclude '.gitignore' ~/repo/wp-content ~/deploy/
+
+      - run:
+          name: wpengine - deployment
+          command: ~/repo/dev_assets/deployment/wpdeploy
+
+#https://circleci.com/docs/1.0/configuration/#branches
+general:
+  branches:
+    only:
+      - dev
+      - staging
+      - production
+  build_dir: gitrepo

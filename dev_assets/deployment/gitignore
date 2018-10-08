@@ -1,0 +1,90 @@
+# WPEngine Truthout 4 gitignore
+
+# wpengine specific
+.smushit-status
+.gitattributes
+_wpeprivate*
+wp-content/object-cache.php
+wp-content/mu-plugins/mu-plugin.php
+wp-content/mu-plugins/slt-force-strong-passwords.php
+wp-content/mu-plugins/stop-long-comments.php
+wp-content/mu-plugins/force-strong-passwords*
+wp-content/mu-plugins/wpengine-common*
+wp-content/mysql.sql
+
+# ignore these core files and config:
+/wp-config.php
+/.htaccess
+/license.txt
+/readme.html
+/sitemap.*
+
+# Ignore everything but wp-content:
+/*
+!wp-content/
+
+# ignore everything in the "wp-content" directory except
+# mu-plugins, plugins, and themes
+wp-content/*
+!wp-content/plugins/
+!wp-content/mu-plugins/
+!wp-content/themes/
+
+#ignore all plugins except to4-framework
+wp-content/plugins/*
+!wp-content/plugins/to4-framework
+
+#ignore all mu-plugins except to4-framework
+wp-content/mu-plugins/*
+!wp-content/mu-plugins/to4-framework
+
+# ignore themes except for truthout4
+wp-content/themes/*
+!wp-content/themes/truthout4
+
+# PROJECT FOLDER
+# ignore the contents of truthout4 except for
+# https://discourse.roots.io/t/export-sage-v9-theme-as-non-composer-node-dependent-normal-theme/9460/3
+wp-content/themes/truthout4/*
+!wp-content/themes/truthout4/app
+!wp-content/themes/truthout4/dist
+!wp-content/themes/truthout4/resources
+!wp-content/themes/truthout4/vendor
+!wp-content/themes/truthout4/LICENSE.md
+!wp-content/themes/truthout4/phpcs.xml
+!wp-content/themes/truthout4/README.md
+
+
+# ignore OS generated files
+*.DS_Store
+*[Tt]humbs.db
+*.Trashes
+ehthumbs.db
+
+# Dev files
+.svn
+
+# known large file types
+*.hqx
+*.bin
+*.exe
+*.dll
+*.deb
+*.dmg
+*.iso
+*.img
+*.msi
+*.msp
+*.msm
+*.mid
+*.midi
+*.kar
+*.mng
+*.asx
+*.asf
+*.wmv
+*.zip
+*.tar
+*.tgz
+*.gz
+*.mp4

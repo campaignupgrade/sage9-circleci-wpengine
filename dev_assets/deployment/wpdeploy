@@ -1,0 +1,23 @@
+#!/bin/bash
+cd ~/deploy
+
+# manage the gitignore for WPE centrally, so we don't have to manage per-environment
+cp ~/repo/dev_assets/deployment/gitignore .gitignore
+
+# remove sage's gitignore, so we manage the folder ourselves
+if [ -f wp-content/themes/truthout4/.gitignore ]
+then
+  git rm wp-content/themes/truthout4/.gitignore
+fi
+
+# make sure that bedrock-autoloader isn't running
+# mostly needed for first-run environments
+if [ -f wp-content/mu-plugins/bedrock-autoloader.php ]
+then
+  git rm wp-content/mu-plugins/bedrock-autoloader.php
+fi
+
+# check whatever's left into WPE's git repo & push it
+git add -A
+git commit -m "CircleCI Deploy Commit"
+git push origin master
