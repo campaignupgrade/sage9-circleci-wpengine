@@ -47,6 +47,7 @@ wp-content/themes/*
 # https://discourse.roots.io/t/export-sage-v9-theme-as-non-composer-node-dependent-normal-theme/9460/3
 wp-content/themes/truthout4/*
 !wp-content/themes/truthout4/app
+!wp-content/themes/truthout4/config
 !wp-content/themes/truthout4/dist
 !wp-content/themes/truthout4/resources
 !wp-content/themes/truthout4/vendor
